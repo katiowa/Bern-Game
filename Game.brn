@@ -1,0 +1,61 @@
+import core
+import strings
+import math
+import style
+import ray
+import world
+
+def play(x, y, d, m) do
+    print(paint("=== BERN QUEST ===", color_yellow()))
+    
+    print(paint(render_minimap(0, x, y, m), color_green()))
+    print(paint("DIR: " + get_dir_name(d), color_blue()))
+    
+    print(render_frame(0.0, x, y, d, m))
+    
+    raw = input("W/A/S/D ou Q: ")
+    cmd = substring(raw, 0, 1)
+    
+    if (cmd == "q") then 
+        return paint("Fim da Jornada.", color_red())
+    else if (cmd == "a") then 
+        return play(x, y, wrap_angle(d - 0.78), m)
+    else if (cmd == "d") then 
+        return play(x, y, wrap_angle(d + 0.78), m)
+    else if (cmd == "w") then
+        step = 0.5
+        nx = x + (sin(d) * step)
+        ny = y - (cos(d) * step)
+        
+        if (get_tile_type(m, nx, ny) == "1") then
+            print(effect_beep())
+            print(paint("!!! BLOQUEADO !!!", color_red()))
+            return play(x, y, d, m)
+        else
+            ignore = log_move("Pos: " + nx)
+            return play(nx, ny, d, m)
+        end
+    else if (cmd == "s") then
+        step = -0.5
+        nx = x + (sin(d) * step)
+        ny = y - (cos(d) * step)
+        
+        if (get_tile_type(m, nx, ny) == "1") then
+            print(effect_beep())
+            print(paint("!!! BLOQUEADO !!!", color_red()))
+            return play(x, y, d, m)
+        else
+            ignore = log_move("Pos: " + nx)
+            return play(nx, ny, d, m)
+        end
+    else
+        return play(x, y, d, m)
+    end
+end
+
+def main() do
+    mapa_data = load_map_file("mapa.txt")
+    play(1.5, 1.5, 1.57, mapa_data)
+end
+
+main()

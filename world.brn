@@ -1,0 +1,14 @@
+import core
+import strings
+
+def load_map_file(path) do
+    raw = read_file(path)
+    c1 = replace(raw, "\n", "")
+    return replace(c1, "\r", "")
+end
+
+def log_move(msg) do
+    // write_file desabilitado temporariamente
+    // write_file("adventure.log", msg)
+    return "ok"
+end

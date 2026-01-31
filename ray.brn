@@ -1,0 +1,108 @@
+import core
+import math
+import strings
+
+def math_to_int(v) do
+    t = v + 0.0
+    c = 0
+    while (t >= 1.0) do
+        t = t - 1.0
+        c = c + 1
+    end
+    return c
+end
+
+def wrap_angle(a) do
+    t = a + 0.0
+    tau = 6.28318
+    while (t > tau) do t = t - tau end
+    while (t < 0.0) do t = t + tau end
+    return t
+end
+
+def get_tile_type(m, x, y) do
+    ix = math_to_int(x)
+    iy = math_to_int(y)
+    idx = (iy * 10) + ix
+    if (idx < 0) then return "1"
+    else if (idx > 99) then return "1"
+    else return substring(m, idx, idx + 1)
+    end
+end
+
+def trace_ray(m, px, py, angle, d) do
+    if (d > 8.0) then return 8.0
+    else 
+        ex = sin(angle)
+        ey = 0.0 - cos(angle)
+        tx = px + (ex * d)
+        ty = py + (ey * d)
+        if (get_tile_type(m, tx, ty) == "1") then return d
+        else return trace_ray(m, px, py, angle, d + 0.3)
+        end
+    end
+end
+
+def shader(y_dbl, d_dbl) do
+    h = 10.0 / d_dbl
+    ceil = 5.0 - (h / 2.0)
+    flr = 5.0 + (h / 2.0)
+    if (y_dbl < ceil) then return " "
+    else if (y_dbl > flr) then return "."
+    else if (d_dbl < 2.5) then return "@"
+    else if (d_dbl < 4.5) then return "#"
+    else return "x"
+    end
+end
+
+def render_line(y, x_cnt, ang, px, py, m) do
+    if (x_cnt > 30.0) then return ""
+    else
+        dist = trace_ray(m, px, py, ang, 0.1)
+        pix = shader(y, dist)
+        return pix + render_line(y, x_cnt + 1.0, ang + 0.04, px, py, m)
+    end
+end
+
+def render_frame(y_dbl, px, py, dir, m) do
+    if (y_dbl > 8.0) then return ""
+    else
+        ang_start = dir - 0.6
+        line = render_line(y_dbl, 0.0, ang_start, px, py, m)
+        return line + "\n" + render_frame(y_dbl + 1.0, px, py, dir, m)
+    end
+end
+
+def render_map_row(y, x, px, py, m) do
+    if (x > 9) then return ""
+    else
+        ix = math_to_int(px)
+        iy = math_to_int(py)
+        if (y == iy && x == ix) then return "P " + render_map_row(y, x + 1, px, py, m)
+        else
+            char = substring(m, (y * 10) + x, (y * 10) + x + 1)
+            if (char == "1") then return "# " + render_map_row(y, x + 1, px, py, m)
+            else return ". " + render_map_row(y, x + 1, px, py, m)
+            end
+        end
+    end
+end
+
+def render_minimap(y, px, py, m) do
+    if (y > 9) then return ""
+    else
+        row = render_map_row(y, 0, px, py, m)
+        return "| " + row + "|\n" + render_minimap(y + 1, px, py, m)
+    end
+end
+
+// SINTAXE CORRIGIDA
+def get_dir_name(d) do
+    a = wrap_angle(d)
+    if (a < 0.78) then return "NORTE ^"
+    else if (a < 2.35) then return "LESTE >"
+    else if (a < 3.92) then return "SUL v"
+    else if (a < 5.49) then return "OESTE <"
+    else return "NORTE ^"
+    end
+end
